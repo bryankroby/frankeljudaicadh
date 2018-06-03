@@ -444,6 +444,65 @@ footer p{
 
 
 
+
 /*#################   TRANSLATE PAGE    ##################*/
+
+.translation-container{
+/*	display: inline-block;
+*/	width: auto;
+	height: auto;
+	margin: 5%;
+	padding: 3%;
+	border: 1px solid black;
+}
+
+.translation-container h1{
+	width: 65%;
+   	font-size: 28pt;
+    padding-top: 4%;
+    padding-bottom: 3%;
+}
+
+.translation-boxes{
+	display: inline-block;
+	width: 100%;
+	margin: 3%;
+}
+
+.translation-boxes h3{
+	padding-top: 1%;
+	padding-bottom: 1%;
+	font-size: 11pt;
+}
+
+.single-translation-box{
+	display: inline-block;
+	width: 27%;
+	margin: 1%;
+	padding: 1%;
+}
+
+.single-translation-box img{
+	width: 100%;
+}
+
+
+.how-it-works-container{
+	width: auto;
+	height: auto;
+	margin: 5%;
+	padding: 3%;
+	border: 1px solid black;
+
+}
+
+.how-it-works-container .larger-text{
+    padding-left: 3%;
+}
+
+
+
+
+
 
 
