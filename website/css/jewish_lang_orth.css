@@ -492,9 +492,11 @@ footer p{
 
 
 .how-it-works-container{
+	display: inline-block;
 	width: auto;
 	height: auto;
 	margin: 5%;
+	margin-bottom: 10%;
 	padding: 3%;
 	border: 1px solid black;
 }
@@ -505,6 +507,28 @@ footer p{
 }
 
 
+.how-it-works-container img{
+	height: 500px;
+	display: inline-block;
+	border: 2px solid grey;
+	float: left;
+	margin-top: 5%;
+	margin-left: 10%;
+}
+
+
+.how-it-works-points{
+	display: inline-block;
+	float: right;
+	width: 80%;
+	margin: 1%;
+	margin-top: 7%;
+}
+
+
+.how-it-works-points p{
+	margin-bottom: 10%;	
+	}
 
 
 
