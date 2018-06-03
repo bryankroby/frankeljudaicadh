@@ -116,9 +116,11 @@ p#Search-Lit{
 
 
 .search-container form{
-    display: block;
-    position: static;
+    display: table;
     padding-bottom: 5%;
+    float: none;
+    width: 90%;
+    vertical-align: middle;
 }
 
 .search-container input{
@@ -129,23 +131,23 @@ p#Search-Lit{
     border: 1px solid black;
     font-size: 18px;
     color: lightgray;
+    display: table-cell;
+    margin-right: 1%;
+
 }
 
 .search-container button{
     position: relative;
-    height: 53px;
+    height: 56px;
     width: 150px;
     background-color: white;
     color: black;
     border: 2px solid #555555;
     font-weight: bold;
     border-radius: 4px;
-
-    display: inline;
     text-decoration: none;
-    margin: auto;
-    justify-content: center;
-    vertical-align: middle;
+    display: table-cell;
+
 
 }
 
