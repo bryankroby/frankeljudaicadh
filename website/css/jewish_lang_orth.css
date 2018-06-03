@@ -173,7 +173,11 @@ hr{
     padding-top: 3%;
 }
 
-p.larger-text{
+
+
+/*This "larger text" serves as in intro in several sections*/
+
+p.larger-text-p{
     font-size: 16pt;
     line-height: 1.6;
     font-family: "Century Gothic", CenturyGothic, AppleGothic, sans-serif;
@@ -260,7 +264,7 @@ button{
 }
 
 
-.abt-this-project h2{
+.larger-text-h{
     width: 65%;
    font-size: 28pt;
     padding-top: 4%;
@@ -493,10 +497,10 @@ footer p{
 	margin: 5%;
 	padding: 3%;
 	border: 1px solid black;
-
 }
 
-.how-it-works-container .larger-text{
+
+.how-it-works-container .larger-text-p{
     padding-left: 3%;
 }
 
