@@ -26,29 +26,36 @@ class Document():
 	pass
 
 
-
 # def load_excel_file(FNAME):
 # 	xl = pd.ExcelFile(FNAME)
 # 	df = xl.parse('Judeo-Arabic')
 # 	return df
 
+
 def load_excel_file(FNAME):
 	wb = load_workbook(filename = FNAME)
-	sheet_ranges = wb['Judeo-Arabic']
+	sheet = wb['Judeo-Arabic']
+	print(sheet['H18'].value)
+	for row in sheet:
+		print(row)
+	return sheet
 
 
 
-	print(sheet_ranges['H18'].value)
+def iterate_rows(sheet):
+	current_number = 2  ## to start with 
+
+	for row in sheet["H18"]:
+		print(row.value)
+		cell_number = "H" + str(current_number)
+		print(cell_number)
+		current_number += 1
+
+the_current_sheet = load_excel_file(FNAME)
+# iterate_rows(the_current_sheet)
 
 
-#load_excel_file(FNAME)	
 
-#current_number = which cell we're on
-
-current_number = 2  ## to start with 
-cell_number = "H" + str(current_number)
-# print(cell_number)
-current_number += 1
 
 
 
@@ -60,25 +67,20 @@ def write_to_excel(filename, cell_number):
 	sheet["AC2"] = "THIS is a test!"
 	xfile.save(FNAME)
 
-write_to_excel(FNAME, cell_number)
 
 
+
+# write_to_excel(FNAME, cell_number)
 
 	# xl = load_workbook(FNAME)
-
 
 	# df = xl.parse('Judeo-Arabic')
 	# return df
 
 
-
-
 # dataframe = load_excel_file(FNAME)
 # for column in dataframe["Title"]:
 # 	print(column)
-
-
-
 
 
 
