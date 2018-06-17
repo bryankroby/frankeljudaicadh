@@ -55,9 +55,10 @@ current_number += 1
 def write_to_excel(filename, cell_number):
 	xfile = openpyxl.load_workbook(filename)
 	sheet = xfile.get_sheet_by_name('Judeo-Arabic')
-	print("herewara")
-	print(sheet)
-	print(sheet[cell_number])
+
+	print(sheet[cell_number].value)
+	sheet["AC2"] = "THIS is a test!"
+	xfile.save(FNAME)
 
 write_to_excel(FNAME, cell_number)
 
