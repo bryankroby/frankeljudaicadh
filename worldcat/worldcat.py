@@ -32,26 +32,46 @@ class Document():
 # 	return df
 
 
-def load_excel_file(FNAME):
+def iterate_excel_file(FNAME):
 	wb = load_workbook(filename = FNAME)
 	sheet = wb['Judeo-Arabic']
-	print(sheet['H18'].value)
-	for row in sheet:
-		print(row)
+	print("HIGHEST ROW")
+	print(sheet.max_row)
+	print("HIGHEST COLUMN")
+	print(sheet.max_column)
+
+	current_number = 2  ## to start with 
+	cell_number = "H" + str(current_number)
+
+	while sheet[cell_number].value != None:
+		print("cell number:")
+		print(cell_number)
+		print("cell value")
+		print(sheet[cell_number].value)
+		current_number += 1
+		cell_number = "H" + str(current_number)
+
 	return sheet
 
 
 
 def iterate_rows(sheet):
-	current_number = 2  ## to start with 
+	
 
-	for row in sheet["H18"]:
-		print(row.value)
-		cell_number = "H" + str(current_number)
-		print(cell_number)
-		current_number += 1
+	# for row in sheet["H18"]:
+	# 	print(row.value)
 
-the_current_sheet = load_excel_file(FNAME)
+
+
+	for row in sheet.iter_cols(min_row = 2, min_col = 8, max_row = 313, max_col= 8):
+		for cell in row:
+			print(cell.value)
+
+
+
+iterate_excel_file(FNAME)
+
+# the_current_sheet = load_excel_file(FNAME)
 # iterate_rows(the_current_sheet)
 
 
