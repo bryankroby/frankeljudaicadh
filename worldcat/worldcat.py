@@ -35,17 +35,42 @@ def write_to_excel(filename, current_number, subjects):
 	sheet[write_to_cell_number] = subjects
 	xfile.save(FNAME)
 
+
+example_title = "Al-Amrikan u elgadara elladhi waqa'at fi dar fudam"
+
 def assemble_url(title):
-	title= title.replace('[', ' ').replace(']', ' ').replace('.', ' ').replace(':', ' ').replace("ʻ", "").replace("(", "").replace(")", "").split()
+	title= title.replace('[', ' ').replace(']', ' ').replace('.', ' ').replace(':', ' ').replace("ʻ", "").replace("(", "").replace(")", "").lower().split()
 	baseurl = "https://www.worldcat.org/title/"
 	title_concat_string = ''
+
 	for word in title:
 		title_concat_string += word + "-"
 
 	title_concat_string = title_concat_string[:-1].replace("--", '-')
-	complete_url = baseurl + title_concat_string
-	print(complete_url)
-	return complete_url
+
+### secondary URL if the first word in title is "al"
+	primary_url = baseurl + title_concat_string
+	print(primary_url)
+
+
+	if title_concat_string[:3] == "al-":
+		print(title_concat_string)
+		secondary_url = baseurl + title_concat_string[3:]
+		print(secondary_url)
+		return primary_url, secondary_url
+	else:
+		return primary_url
+
+assemble_url(example_title)
+
+
+## things to do:
+# if starts with al, make a contingency url, that eliminates it
+# if lands on a page with many items, choose the first one, look for subjects
+# if not, choose the second link 
+
+# run the loop again, but if if the value of the subject_tags column is none, then get the info
+
 
 def make_request(complete_url):
 	print("Making a request for new data...")
@@ -111,7 +136,7 @@ def iterate_excel_file(FNAME):
 
 	return sheet
 
-iterate_excel_file(FNAME)
+#iterate_excel_file(FNAME)
 
 
 
