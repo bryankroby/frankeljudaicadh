@@ -8,6 +8,8 @@ import re
 
 from openpyxl import *
 
+from openpyxl import load_workbook
+
 import openpyxl
 
 # api_key = secrets.api_key
@@ -64,7 +66,7 @@ def make_request(complete_url):
 				for item in subjects:
 					if item not in subject_list:
 						subject_list.append(item)
-				subject_string = ", ".join(subject_list)
+				subject_string = "; ".join(subject_list)
 				return subject_string
 		except:
 			print("### COULDN'T GET SUBJECTS ###")
@@ -75,7 +77,7 @@ def make_request(complete_url):
 
 
 def iterate_excel_file(FNAME):
-	wb = load_workbook(filename = FNAME)
+	wb = load_workbook(filename = FNAME, read_only = True)
 	sheet = wb['Judeo-Arabic']
 	current_number = 2  ## to start with 
 	count_times_written = 0
