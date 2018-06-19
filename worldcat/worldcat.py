@@ -36,69 +36,94 @@ def write_to_excel(filename, current_number, subjects):
 	xfile.save(FNAME)
 
 
-example_title = "Al-Amrikan u elgadara elladhi waqa'at fi dar fudam"
+example_title = "[al-Tuwarikh al-Yisraʼiliya]."
 
 def assemble_url(title):
-	title= title.replace('[', ' ').replace(']', ' ').replace('.', ' ').replace(':', ' ').replace("ʻ", "").replace("(", "").replace(")", "").lower().split()
+	title= title.replace('[', ' ').replace(']', ' ').replace('.', ' ').replace(':', ' ').replace("ʻ", "").replace("(", "").replace(")", "").replace("ʼ", "").replace("'", "").lower().split()
 	baseurl = "https://www.worldcat.org/title/"
 	title_concat_string = ''
 
 	for word in title:
 		title_concat_string += word + "-"
-
 	title_concat_string = title_concat_string[:-1].replace("--", '-')
-
-### secondary URL if the first word in title is "al"
 	primary_url = baseurl + title_concat_string
-	print(primary_url)
-
-
+### secondary URL if the first word in title is "al"
 	if title_concat_string[:3] == "al-":
-		print(title_concat_string)
 		secondary_url = baseurl + title_concat_string[3:]
-		print(secondary_url)
 		return primary_url, secondary_url
 	else:
-		return primary_url
+		return primary_url, None
 
-assemble_url(example_title)
-
+example_assembled = assemble_url(example_title)
+print(example_assembled)
 
 ## things to do:
-# if starts with al, make a contingency url, that eliminates it
+# if starts with al, make a contingency url, that eliminates it DONEZO
 # if lands on a page with many items, choose the first one, look for subjects
 # if not, choose the second link 
 
 # run the loop again, but if if the value of the subject_tags column is none, then get the info
 
 
-def make_request(complete_url):
+def make_request(primary_url, secondary_url):
 	print("Making a request for new data...")
-	resp = requests.get(complete_url)
+	resp = requests.get(primary_url)
+	resp = resp.content
+	soup = BeautifulSoup(resp, 'html.parser')
 
-	print(resp.status_code)
-	if resp.status_code == 200:
-		resp = resp.content
-		soup = BeautifulSoup(resp, 'html.parser')
-		try:
-			subject_div = soup.find_all(id = "subject-terms")
-			subject_list = []
-			subject_string = ""
+### if WorldCat brings up error that no results found with primary_url, then try secondary_url
+	if soup.find_all(class_ = "error-results", id = "div-results-none"):
+		print("found an error the first time")
 
-			for line in subject_div:
-				subjects = line.text.replace('--', "").replace(".", "").split()
+		### if there is a secondary url to try, try it. 
+		if secondary_url != None:
+			print(secondary_url)
+			resp = requests.get(secondary_url)
+			resp = resp.content
+			soup = BeautifulSoup(resp, 'html.parser')
+			if soup.find_all(class_ = "error-results", id = "div-results-none"):
+				print("Found an error with the first and second url!")
+				request_without_error = False
+		
+		## meaning there is no secondary url, we are out of luck with this item 
+		else:
+			request_without_error = False
 
-				for item in subjects:
-					if item not in subject_list:
-						subject_list.append(item)
-				subject_string = "; ".join(subject_list)
-				return subject_string
-		except:
-			print("### COULDN'T GET SUBJECTS ###")
-			return False			
+	# meaning the primary url worked fine		
 	else:
-		print("### BAD STATUS CODE ###")
-		return False
+		request_without_error = True
+		print('passed')
+
+make_request(*example_assembled)
+
+
+	# print(resp.status_code)
+	# if resp.status_code == 200:
+	# 	resp = resp.content
+	# 	soup = BeautifulSoup(resp, 'html.parser')
+	# 	try:
+	# 		subject_div = soup.find_all(id = "subject-terms")
+	# 		subject_list = []
+	# 		subject_string = ""
+
+	# 		for line in subject_div:
+	# 			subjects = line.text.replace('--', "").replace(".", "").split()
+
+	# 			for item in subjects:
+	# 				if item not in subject_list:
+	# 					subject_list.append(item)
+	# 			subject_string = "; ".join(subject_list)
+	# 			return subject_string
+	# 	except:
+	# 		print("### COULDN'T GET SUBJECTS ###")
+	# 		return False			
+	# else:
+	# 	print("### BAD STATUS CODE ###")
+	# 	return False
+
+
+
+
 
 
 def iterate_excel_file(FNAME):
