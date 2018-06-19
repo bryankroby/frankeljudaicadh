@@ -80,30 +80,43 @@ def find_subjects(soup):
 		return False			
 
 
+## if not error, need to check if on a menu page or if on the item's page
+## if on the menu page, follow the link into the first menu, get subject_tags, as usual
+## possibly investigate second href on the menu page, as well
+
+## improve what happens with tags with commas in them like:
+#"Esther,; Queen; of; Persia; Bible; stories,; Judeo; Arabic; Esther; Old; Testament"
+# or " Judeo-Arabic; literature; Jews; History; To; 70; AD"
+
+
+def make_soup(url):
+	print("Making a request for new data...")
+	resp = requests.get(url)
+	resp = resp.content
+	soup_contents = BeautifulSoup(resp, 'html.parser')
+	return soup_contents
+
+
 ##tries to make request with two different URLS and looks for subjects
 def make_request(primary_url, secondary_url):
-	print("Making a request for new data...")
-
-	resp = requests.get(primary_url)
-	resp = resp.content
-	soup = BeautifulSoup(resp, 'html.parser')
+	soup = make_soup(primary_url)
 
 	## if WorldCat brings up error that no results found with primary_url, then try secondary_url
 	if soup.find_all(class_ = "error-results", id = "div-results-none"):
 		print("found an error with the first url")
+
 		### if there is a secondary url to try, try it. 
 		try: 
-			print("Making SECONDARY request for new data...")
-			resp = requests.get(secondary_url)
-			resp = resp.content
-			soup = BeautifulSoup(resp, 'html.parser')
+			soup = make_soup(secondary_url)
 			if soup.find_all(class_ = "error-results", id = "div-results-none"):
 				print("Found an error with the first and second url!")
 				##  secondary_url returned error, as well
 				request_without_error = False
+
 			## secondary_url worked!	
 			else:
 				request_without_error = True
+
 		### if there is no secondary url, out of luck, ultimately false
 		except:
 			request_without_error = False
@@ -112,18 +125,42 @@ def make_request(primary_url, secondary_url):
 	else:
 		request_without_error = True
 
-	##success with on of the URLs, now look for subjects 
+	## no error with URLs, now find out if on menu page and look for subjects 
 	if request_without_error == True:
-		## will return the subject string if exists, if not, False
+
+		##need to find out if on menu page or specific item page
+		the_menu_exists = soup.find(class_ = "menuElem")
+		print("the the_menu_exists")
+		## if we are indeed on the menu page... 
+		if the_menu_exists:
+			baseurl = "https://www.worldcat.org"
+
+			menu_items = the_menu_exists.find_all(class_= "result details")
+			print("the menu items exist")
+
+			href = menu_items[0].find("a")['href']
+
+			complete_url = baseurl + href
+
+
+			print(complete_url)
+			print("#################")
+			##need to follow the first href and get its soup
+
+
+		## will return the subject string if exists, if not, returns False
 		subject_string_or_false = find_subjects(soup)
 		print(subject_string_or_false)
+		return subject_string_or_false
+	#returns false if not able to reach an appropriate URL
+	else:
+		return request_without_error
 
-	return subject_string_or_false
 
-
-# example_assembled = assemble_url(example_title)
+example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
 # print(example_assembled)
-# make_request(*example_assembled)
+made = make_request(example_assembled, None)
+print(made)
 
 
 
@@ -172,9 +209,9 @@ def iterate_excel_file(FNAME):
 	print("Times NOT written = ")
 	print(count_times_NOT_written)
 
-	return sheet
+	#return sheet
 
-iterate_excel_file(FNAME)
+#iterate_excel_file(FNAME)
 
 
 

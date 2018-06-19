@@ -101,6 +101,7 @@ def make_request(primary_url, secondary_url):
 				print("Found an error with the first and second url!")
 				##  secondary_url returned error, as well
 				request_without_error = False
+
 			## secondary_url worked!	
 			else:
 				request_without_error = True
@@ -114,11 +115,13 @@ def make_request(primary_url, secondary_url):
 
 	##success with on of the URLs, now look for subjects 
 	if request_without_error == True:
-		## will return the subject string if exists, if not, False
+		## will return the subject string if exists, if not, returns False
 		subject_string_or_false = find_subjects(soup)
 		print(subject_string_or_false)
-
-	return subject_string_or_false
+		return subject_string_or_false
+	#returns false if not able to reach an appropriate URL
+	else:
+		return request_without_error
 
 
 # example_assembled = assemble_url(example_title)
