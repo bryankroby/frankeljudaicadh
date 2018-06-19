@@ -91,29 +91,29 @@ def make_request(primary_url, secondary_url):
 	## if WorldCat brings up error that no results found with primary_url, then try secondary_url
 	if soup.find_all(class_ = "error-results", id = "div-results-none"):
 		print("found an error with the first url")
-
 		### if there is a secondary url to try, try it. 
-		if secondary_url != None:
+		try: 
 			print("Making SECONDARY request for new data...")
 			resp = requests.get(secondary_url)
 			resp = resp.content
 			soup = BeautifulSoup(resp, 'html.parser')
 			if soup.find_all(class_ = "error-results", id = "div-results-none"):
 				print("Found an error with the first and second url!")
+				##  secondary_url returned error, as well
 				request_without_error = False
-			## secondary url worked!	
+			## secondary_url worked!	
 			else:
 				request_without_error = True
-		## meaning there is no secondary url, we are out of luck with this item 
-		else:
+		### if there is no secondary url, out of luck, ultimately false
+		except:
 			request_without_error = False
+
 	# meaning the primary url worked fine		
 	else:
 		request_without_error = True
 
-	##success with a URL, now look for subjects 
+	##success with on of the URLs, now look for subjects 
 	if request_without_error == True:
-
 		## will return the subject string if exists, if not, False
 		subject_string_or_false = find_subjects(soup)
 		print(subject_string_or_false)
