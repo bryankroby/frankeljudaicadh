@@ -80,10 +80,9 @@ def find_subjects(soup):
 		return False			
 
 
-## if not error, need to check if on a menu page or if on the item's page
-## if on the menu page, follow the link into the first menu, get subject_tags, as usual
-## possibly investigate second href on the menu page, as well
 
+
+## possibly investigate second href on the menu page, as well
 ## improve what happens with tags with commas in them like:
 #"Esther,; Queen; of; Persia; Bible; stories,; Judeo; Arabic; Esther; Old; Testament"
 # or " Judeo-Arabic; literature; Jews; History; To; 70; AD"
@@ -130,23 +129,18 @@ def make_request(primary_url, secondary_url):
 
 		##need to find out if on menu page or specific item page
 		the_menu_exists = soup.find(class_ = "menuElem")
-		print("the the_menu_exists")
-		## if we are indeed on the menu page... 
+		print("the_menu_exists")
+
+		## if we are indeed on the menu page... 			
+		## follow the first href and get its soup
 		if the_menu_exists:
 			baseurl = "https://www.worldcat.org"
-
 			menu_items = the_menu_exists.find_all(class_= "result details")
 			print("the menu items exist")
-
 			href = menu_items[0].find("a")['href']
-
 			complete_url = baseurl + href
-
-
-			print(complete_url)
-			print("#################")
-			##need to follow the first href and get its soup
-
+			soup = make_soup(complete_url)
+		#if not on menu page, try assuming we are on the item page. find_subjects will return false otherwise.
 
 		## will return the subject string if exists, if not, returns False
 		subject_string_or_false = find_subjects(soup)
@@ -157,10 +151,9 @@ def make_request(primary_url, secondary_url):
 		return request_without_error
 
 
-example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
-# print(example_assembled)
-made = make_request(example_assembled, None)
-print(made)
+# example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
+# made = make_request(example_assembled, None)
+# print(made)
 
 
 
@@ -220,5 +213,5 @@ def iterate_excel_file(FNAME):
 # if not, choose the second link  DONEZO
 # run the loop again, but if if the value of the subject_tags column is none, then get the info DONEZO
 
-# if lands on a page with many items, choose the first one, look for subjects
+# if lands on a page with many items, choose the first one, look for subjects DONEZO
 
