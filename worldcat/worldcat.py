@@ -72,7 +72,7 @@ def find_subjects(soup):
 				if item not in subject_list:
 					subject_list.append(item)
 			subject_string = "; ".join(subject_list)
-			print(subject_string)
+			#print(subject_string)
 			return subject_string
 	#the item doesn't have subject terms 
 	else:
@@ -80,23 +80,26 @@ def find_subjects(soup):
 		return False			
 
 
+def make_soup(url):
+	resp = requests.get(url)
+	resp = resp.content
+	soup_contents = BeautifulSoup(resp, 'html.parser')
+	return soup_contents
+
+
 ##tries to make request with two different URLS and looks for subjects
 def make_request(primary_url, secondary_url):
-	print("Making a request for new data...")
-
-	resp = requests.get(primary_url)
-	resp = resp.content
-	soup = BeautifulSoup(resp, 'html.parser')
+	print("Making request for new data using primary_url")
+	soup = make_soup(primary_url)
 
 	## if WorldCat brings up error that no results found with primary_url, then try secondary_url
 	if soup.find_all(class_ = "error-results", id = "div-results-none"):
 		print("found an error with the first url")
+
 		### if there is a secondary url to try, try it. 
 		try: 
-			print("Making SECONDARY request for new data...")
-			resp = requests.get(secondary_url)
-			resp = resp.content
-			soup = BeautifulSoup(resp, 'html.parser')
+			print("Making request for new data using SECONDARY Url")
+			soup = make_soup(secondary_url)
 			if soup.find_all(class_ = "error-results", id = "div-results-none"):
 				print("Found an error with the first and second url!")
 				##  secondary_url returned error, as well
@@ -105,6 +108,7 @@ def make_request(primary_url, secondary_url):
 			## secondary_url worked!	
 			else:
 				request_without_error = True
+
 		### if there is no secondary url, out of luck, ultimately false
 		except:
 			request_without_error = False
@@ -113,8 +117,25 @@ def make_request(primary_url, secondary_url):
 	else:
 		request_without_error = True
 
-	##success with on of the URLs, now look for subjects 
+	## no error with URLs, now find out if on menu page and look for subjects 
 	if request_without_error == True:
+
+		##need to find out if on menu page or specific item page
+		the_menu_exists = soup.find(class_ = "menuElem")
+		print("the_menu_exists")
+
+		## if we are indeed on the menu page... 			
+		## follow the first href and get its soup
+		if the_menu_exists:
+			baseurl = "https://www.worldcat.org"
+			menu_items = the_menu_exists.find_all(class_= "result details")
+			print("The menu items exist")
+			href = menu_items[0].find("a")['href']
+			complete_url = baseurl + href
+			print("Making request for new data using HREF from menuElem")
+			soup = make_soup(complete_url)
+		#if not on menu page, try assuming we are on the item page. find_subjects will return false otherwise.
+
 		## will return the subject string if exists, if not, returns False
 		subject_string_or_false = find_subjects(soup)
 		print(subject_string_or_false)
@@ -122,12 +143,6 @@ def make_request(primary_url, secondary_url):
 	#returns false if not able to reach an appropriate URL
 	else:
 		return request_without_error
-
-
-# example_assembled = assemble_url(example_title)
-# print(example_assembled)
-# make_request(*example_assembled)
-
 
 
 def iterate_excel_file(FNAME):
@@ -148,9 +163,11 @@ def iterate_excel_file(FNAME):
 	#		print("value of subject cell is None!!!")
 		#print(title_cell_number)
 		current_title = sheet[title_cell_number].value  
+		print(current_title)
 
 		##pass the title into assemble_url, which makes it into a url can make request with
 		assembled_url = assemble_url(current_title)
+		print(assembled_url)
 
 		##making the request with assembled URL, if there's an error, will return false
 		result = make_request(*assembled_url) 
@@ -175,16 +192,32 @@ def iterate_excel_file(FNAME):
 	print("Times NOT written = ")
 	print(count_times_NOT_written)
 
-	return sheet
+	#return sheet
 
+
+
+
+######### To demo a part of the script #######
+# example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
+# made = make_request(example_assembled, None)
+# print(made)
+
+
+######### TO RUN THE SCRIPT, UNCOMMENT BELOW! ######
 iterate_excel_file(FNAME)
 
 
 
-## things to do:
+######  SCRIPT TO-DO LIST #####
 # if starts with al, make a contingency url, that eliminates it DONEZO
 # if not, choose the second link  DONEZO
 # run the loop again, but if if the value of the subject_tags column is none, then get the info DONEZO
+# if lands on a page with many items, choose the first one, look for subjects DONEZO
 
-# if lands on a page with many items, choose the first one, look for subjects
+
+## possibly investigate second href on the menu page, as well
+
+## improve what happens with tags with commas in them like:
+#"Esther,; Queen; of; Persia; Bible; stories,; Judeo; Arabic; Esther; Old; Testament"
+# or " Judeo-Arabic; literature; Jews; History; To; 70; AD"
 
