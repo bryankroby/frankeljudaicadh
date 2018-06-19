@@ -53,16 +53,22 @@ def make_request(complete_url):
 	if resp.status_code == 200:
 		resp = resp.content
 		soup = BeautifulSoup(resp, 'html.parser')
-		subject_div = soup.find_all(id = "subject-terms")
-		subject_list = []
+		try:
+			subject_div = soup.find_all(id = "subject-terms")
+			subject_list = []
+			subject_string = ""
 
-		for line in subject_div:
-			subjects = line.text.replace('--', "").replace(".", "").split()
+			for line in subject_div:
+				subjects = line.text.replace('--', "").replace(".", "").split()
 
-			for item in subjects:
-				if item not in subject_list:
-					subject_list.append(item)
-			return subject_list
+				for item in subjects:
+					if item not in subject_list:
+						subject_list.append(item)
+				subject_string = ", ".join(subject_list)
+				return subject_string
+		except:
+			print("### COULDN'T GET SUBJECTS ###")
+			return False			
 	else:
 		print("### BAD STATUS CODE ###")
 		return False
