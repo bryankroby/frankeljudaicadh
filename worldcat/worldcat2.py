@@ -172,15 +172,19 @@ def iterate_excel_file(FNAME):
 	wb = load_workbook(filename = FNAME, read_only = True)
 	sheet = wb['Judeo-Arabic']
 	sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
-	current_number = 2  ## to start with 
+
+	# current_number = 2  ## to start with ----> CHANGE BACK
+	current_number = 90
+
+
 	count_times_written = 0
 	count_times_NOT_written = 0 
 	title_cell_number = "H" + str(current_number)
 	write_to_cell_number = "W" + str(current_number)
 
 	#for all the rows of items
-	# while sheet[title_cell_number].value != None:
-	for i in range(3):
+	while sheet[title_cell_number].value != None:
+	# for i in range(3):
 
 		#if item does not already have subjects assined to it
 	#		print("value of subject cell is None!!!")
