@@ -174,7 +174,9 @@ def iterate_excel_file(FNAME):
 	sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
 
 	# current_number = 2  ## to start with ----> CHANGE BACK
-	current_number = 90
+
+	##it happened around 90, 114, 139
+	current_number = 289
 
 
 	count_times_written = 0
