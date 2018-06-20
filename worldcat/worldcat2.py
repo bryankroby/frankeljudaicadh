@@ -30,7 +30,7 @@ class Document():
 
 #opens excel file, writes subjects to the given subject_tag cell number --> WILL NEED TO CHANGE SPECIFIED CELL # LATER
 def write_to_excel(filename, current_number, subjects):
-	xfile = openpyxl.load_workbook(filename, read_only=False, keep_vba=True)
+	xfile = openpyxl.load_workbook(filename = FNAME, read_only=False, keep_vba=True)
 	sheet = xfile.get_sheet_by_name('Judeo-Arabic')
 	write_to_cell_number = "W" + str(current_number)
 	#print(sheet[write_to_cell_number].value)
@@ -220,15 +220,15 @@ def iterate_excel_file(FNAME):
 
 
 ######### To demo a part of the script #######
-example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
+# example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
 
-example_assembled = "https://www.worldcat.org/title/-20160603/oclc/6914317075&referer=brief_results"
-made = make_request(example_assembled, None)
-print(made)
+# example_assembled = "https://www.worldcat.org/title/-20160603/oclc/6914317075&referer=brief_results"
+# made = make_request(example_assembled, None)
+# print(made)
 
 
 ######### TO RUN THE SCRIPT, UNCOMMENT BELOW! ######
-#iterate_excel_file(FNAME)
+iterate_excel_file(FNAME)
 
 
 
