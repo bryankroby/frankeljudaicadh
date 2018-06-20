@@ -7,6 +7,7 @@ import pandas as pd
 import re
 
 from openpyxl import *
+from openpyxl import Workbook 
 
 from openpyxl import load_workbook
 
@@ -14,7 +15,7 @@ import openpyxl
 
 # api_key = secrets.api_key
 
-FNAME = "Judeo_arabic_spreadsheet.xlsx"
+FNAME = "Judeo_arabic_spreadsheet.xlsm"
 
 
 
@@ -29,9 +30,9 @@ class Document():
 
 #opens excel file, writes subjects to the given subject_tag cell number --> WILL NEED TO CHANGE SPECIFIED CELL # LATER
 def write_to_excel(filename, current_number, subjects):
-	xfile = openpyxl.load_workbook(filename)
+	xfile = openpyxl.load_workbook(filename = FNAME, read_only=False, keep_vba=True)
 	sheet = xfile.get_sheet_by_name('Judeo-Arabic')
-	write_to_cell_number = "AE" + str(current_number)
+	write_to_cell_number = "W" + str(current_number)
 	#print(sheet[write_to_cell_number].value)
 	sheet[write_to_cell_number] = subjects
 	xfile.save(FNAME)
@@ -61,7 +62,7 @@ def assemble_url(title):
 def find_subjects(soup):
 	#if the item has subject terms
 	if soup.find_all(id = "subject-terms"):
-		subject_div = soup.find_all(id = "subject-terms") 
+		subject_div = soup.find_all(id = "subject-terms")["li"] 
 		subject_list = []
 		subject_string = ""
 
@@ -78,6 +79,16 @@ def find_subjects(soup):
 	else:
 		##couldn't get subjects 
 		return False			
+
+
+def find_page_number_description(soup):
+	description_div = soup.find(id = "details-description")
+	if description_div:
+		the_description = description_div["td"].text
+		print(the_description)
+
+
+
 
 
 def make_soup(url):
@@ -130,14 +141,25 @@ def make_request(primary_url, secondary_url):
 			baseurl = "https://www.worldcat.org"
 			menu_items = the_menu_exists.find_all(class_= "result details")
 			print("The menu items exist")
-			href = menu_items[0].find("a")['href']
-			complete_url = baseurl + href
-			print("Making request for new data using HREF from menuElem")
-			soup = make_soup(complete_url)
+
+			## some of the titles are the same as Arabic works
+			verifying_language = menu_items[0].find(class_= "itemLanguage").text
+			if verifying_language != "Arabic":
+				href = menu_items[0].find("a")['href']
+				complete_url = baseurl + href
+				print("Making request for new data using HREF from menuElem")
+				soup = make_soup(complete_url)
+			else:
+				print("Got mixed up with an Arabic text")
+
+
 		#if not on menu page, try assuming we are on the item page. find_subjects will return false otherwise.
 
 		## will return the subject string if exists, if not, returns False
 		subject_string_or_false = find_subjects(soup)
+
+		### need to find number of pages, and other notes, if possible, and return a tuple 
+
 		print(subject_string_or_false)
 		return subject_string_or_false
 	#returns false if not able to reach an appropriate URL
@@ -148,20 +170,20 @@ def make_request(primary_url, secondary_url):
 def iterate_excel_file(FNAME):
 	wb = load_workbook(filename = FNAME, read_only = True)
 	sheet = wb['Judeo-Arabic']
+	sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
 	current_number = 2  ## to start with 
 	count_times_written = 0
 	count_times_NOT_written = 0 
 	title_cell_number = "H" + str(current_number)
-	print("Title cell number:")
-	print(title_cell_number)
-	write_to_cell_number = "AE" + str(current_number)
+	write_to_cell_number = "W" + str(current_number)
 
 	#for all the rows of items
 	while sheet[title_cell_number].value != None:
 
 		#if item does not already have subjects assined to it
 	#		print("value of subject cell is None!!!")
-		#print(title_cell_number)
+		print("Title cell number:")
+		print(title_cell_number)
 		current_title = sheet[title_cell_number].value  
 		print(current_title)
 
@@ -199,6 +221,8 @@ def iterate_excel_file(FNAME):
 
 ######### To demo a part of the script #######
 # example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
+
+# example_assembled = "https://www.worldcat.org/title/-20160603/oclc/6914317075&referer=brief_results"
 # made = make_request(example_assembled, None)
 # print(made)
 
@@ -214,10 +238,14 @@ iterate_excel_file(FNAME)
 # run the loop again, but if if the value of the subject_tags column is none, then get the info DONEZO
 # if lands on a page with many items, choose the first one, look for subjects DONEZO
 
-
 ## possibly investigate second href on the menu page, as well
 
 ## improve what happens with tags with commas in them like:
 #"Esther,; Queen; of; Persia; Bible; stories,; Judeo; Arabic; Esther; Old; Testament"
 # or " Judeo-Arabic; literature; Jews; History; To; 70; AD"
+
+
+### make a contingency before getting something from the menu that it is in hebrew or judeo-arabic
+
+## need to make it so file format doesn't die after writing on it.
 

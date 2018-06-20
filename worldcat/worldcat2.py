@@ -6,7 +6,6 @@ from bs4 import BeautifulSoup
 import pandas as pd
 import re
 
-from openpyxl import *
 from openpyxl import Workbook 
 
 from openpyxl import load_workbook
@@ -30,11 +29,12 @@ class Document():
 
 #opens excel file, writes subjects to the given subject_tag cell number --> WILL NEED TO CHANGE SPECIFIED CELL # LATER
 def write_to_excel(filename, current_number, subjects):
+	wb = Workbook()
 	xfile = openpyxl.load_workbook(filename = FNAME, read_only=False, keep_vba=True)
 	sheet = xfile.get_sheet_by_name('Judeo-Arabic')
 	write_to_cell_number = "W" + str(current_number)
 	#print(sheet[write_to_cell_number].value)
-	sheet[write_to_cell_number] = subjects
+	sheet[write_to_cell_number].value = subjects
 	xfile.save(FNAME)
 
 
@@ -62,7 +62,8 @@ def assemble_url(title):
 def find_subjects(soup):
 	#if the item has subject terms
 	if soup.find_all(id = "subject-terms"):
-		subject_div = soup.find_all(id = "subject-terms") 
+		subject_div = soup.find_all(id = "subject-terms")
+		# subject_div = subject_div.find_all('li', attrs={'class' :"subject-term"})
 		subject_list = []
 		subject_string = ""
 
@@ -178,7 +179,8 @@ def iterate_excel_file(FNAME):
 	write_to_cell_number = "W" + str(current_number)
 
 	#for all the rows of items
-	while sheet[title_cell_number].value != None:
+	# while sheet[title_cell_number].value != None:
+	for i in range(3):
 
 		#if item does not already have subjects assined to it
 	#		print("value of subject cell is None!!!")
@@ -202,6 +204,7 @@ def iterate_excel_file(FNAME):
 		else:
 			count_times_NOT_written += 1
 
+		print("\n###################\n")
 		current_number += 1
 		title_cell_number = "H" + str(current_number)
 
