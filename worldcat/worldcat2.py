@@ -14,7 +14,7 @@ import openpyxl
 
 # api_key = secrets.api_key
 
-FNAME = "Judeo_arabic_spreadsheet2.xlsm"
+FNAME = "Judeo_arabic_spreadsheet copy 2.xlsm"
 
 
 ## creating a class for each publication
@@ -59,7 +59,7 @@ def make_soup(url):
 def assemble_url(a_title, an_author):
     title= reg_ex(a_title)
     baseurl = "https://www.worldcat.org/search?q=" + title
-
+    primary_url = baseurl
     ## if there is an author:  need to get rid of the title part in the base url
 
 ### getting rid of this cause causes problems if not the same spelling of author..... might run it both ways and see the error
@@ -86,6 +86,8 @@ def find_subjects(soup, error_cell_number):
                     subject_list.append(item)
             subject_string = "; ".join(subject_list)
             #print(subject_string)
+
+            subject_string.replace("; View; all; subjects", "")
             return subject_string
     #the item doesn't have subject terms 
     else:
@@ -98,27 +100,31 @@ def find_subjects(soup, error_cell_number):
 
 ## finds and returns description or false. does not record an error message
 def find_page_number_description(soup):
-    description_div = soup.find(id = "details-description")
-    if description_div:
-        description = description_div["td"].text
+    try:
+        description_div = soup.find(id = "details-description")
+        description = description_div.find("td").text
+
         print(description)
         return description
-    else:
+    except:
         print("no description")
         return False
 
 
+
 ## finds and returns notes or false. does not record an error message
 def find_item_notes(soup):
-    notes_div = soup.find(id = "details-notes")
-    if notes_div:
-        notes = notes_div["td"].text
+    # if notes_div exists:
+    try:
+        notes_div = soup.find(id = "details-notes")
+        notes = notes_div.find("td")
+        notes = str(notes).replace("<br/>", " ").replace("<td>", "").replace("</td>", "")
         print(notes)
         return notes
-    else:
+    # no notes_div exists
+    except:
         print("no notes")
         return False
-
 
 
 ## makes search request  looks for subjects
@@ -187,18 +193,24 @@ def make_request(primary_url, error_cell_number):
 
 
         ### need to find number of pages, and other notes, if possible, and return a tuple 
-        print(subject_string_or_false, item_description_or_false, item_notes_or_false)
-        return subject_string_or_false, item_description_or_false, item_notes_or_false
+        return_tuple = (subject_string_or_false, item_description_or_false, item_notes_or_false)
+        print(len(return_tuple))
+        print(return_tuple)
+        return return_tuple
 
 
 
 def iterate_excel_file():
     wb = load_workbook(filename = FNAME, read_only = True)
+    ## getting a specific sheet from the XL
     sheet = wb['Judeo-Arabic']
     sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
     
     ## Cell row to start with 
-    current_number = 2  
+    # current_number = 2  ############ ---> Original start row = 2
+
+
+    current_number = 13
 
     title_cell_number = "H" + str(current_number)
     author_cell_number = "G" + str(current_number)
@@ -240,7 +252,8 @@ def iterate_excel_file():
 
             # <1 would mean  was no valid entry and therefore, didn't get subjects
             ## meaning there was a valid entry and it went forth to check subjects, notes, description
-            if len(result) >1:
+            if result != False:
+            # if len(result) >1:
                 subjects = result[0]
                 description = result[1]
                 notes = result[2]
