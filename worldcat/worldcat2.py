@@ -14,7 +14,7 @@ import openpyxl
 
 # api_key = secrets.api_key
 
-FNAME = "Judeo_arabic_spreadsheet copy 2.xlsm"
+FNAME = "Judeo_arabic_spreadsheet copy.xlsm"
 
 
 ## creating a class for each publication
@@ -79,16 +79,26 @@ def find_subjects(soup, error_cell_number):
         subject_string = ""
 
         for line in subject_div:
-            subjects = line.text.replace('--', "").replace(".", "").split()
+            subjects = line.text.replace(".", "").split("\n")
+            for a_line in subjects:
+                a_line = a_line.split(" -- ")
 
-            for item in subjects:
-                if item not in subject_list:
-                    subject_list.append(item)
-            subject_string = "; ".join(subject_list)
-            #print(subject_string)
 
-            subject_string.replace("; View; all; subjects", "")
-            return subject_string
+        ## finally i've got a line that is all clean
+                for word in a_line:
+                    ## if word isn't empty ''
+                    if len(word) >0:
+                    ## getting rid of unnecessary comma cause i'm going to join them with semi-colon
+                        if word[-1] == ",":
+                            new_word = word[:-1] 
+                        else:
+                            new_word = word
+                        #now, i have the official "new word" either way
+                        if new_word not in subject_list:
+                            subject_list.append(new_word)
+
+        subject_string = "; ".join(subject_list)
+        return subject_string
     #the item doesn't have subject terms 
     else:
         ##couldn't get subjects 
@@ -133,14 +143,22 @@ def make_request(primary_url, error_cell_number):
     soup = make_soup(primary_url)
 
     ## if WorldCat brings up error that no results found with primary_url, then try secondary_url
+
+    ##does it do all these steps either way??
+    print("got to line 148")
     if soup.find_all(class_ = "error-results", id = "div-results-none"):
+        print("got to line 150")
         error_message = "Error with primary URL"
         write_to_excel(error_cell_number, error_message)
         print(error_message)
         request_without_error = False
+        return request_without_error
+
+
 
     ## no error with primary_URL, now find out if on menu page and look for subjects 
     else:
+        print("got to line 158")
         request_without_error = True
         ##need to find out if on menu page or specific item page
         baseurl = "https://www.worldcat.org"
@@ -149,7 +167,6 @@ def make_request(primary_url, error_cell_number):
         menu = soup.find(class_ = "menuElem")
         menu_items = menu.find_all(class_= "result details")
         print("The menu items exist")
-
 
         ## verify in the correct language in the first link
         verifying_language = menu_items[0].find(class_= "itemLanguage").text
@@ -182,8 +199,8 @@ def make_request(primary_url, error_cell_number):
             return valid_entries   ### --> in this case, only thing returned is false.
 
 
-    # else:
-    #     pass
+# else:
+#     pass
 
         ## able to find a valid entry, will look for and return the subject string if exists, if not, returns False
         if valid_entries == True:
@@ -207,10 +224,10 @@ def iterate_excel_file():
     sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
     
     ## Cell row to start with 
-    # current_number = 2  ############ ---> Original start row = 2
+    current_number = 2  ############ ---> Original start row = 2
 
 
-    current_number = 13
+    current_number = 12
 
     title_cell_number = "H" + str(current_number)
     author_cell_number = "G" + str(current_number)
