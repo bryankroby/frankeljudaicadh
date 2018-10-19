@@ -13,7 +13,8 @@ import openpyxl
 # api_key = secrets.api_key
 
 # FNAME = "Judeo_arabic_spreadsheet copy.csv"
-FNAME = "Judeo_arabic_spreadsheet copy.xlsx"
+# FNAME = "Judeo_arabic_spreadsheet copy.xlsx"
+FNAME = "Judeo_arabic_spreadsheet copy oct18 copy.xlsx"
 
 alternative_place_spellings_dict= {"Alexandria": ("Alexandria", "aleksandria", "aleksandrya", "Aleksandriya", "Eskendereyya", "al-ʾIskandariyya", "Rakote", 7), 
 "Aden": ("Aden", "Adin", 2),
@@ -23,7 +24,7 @@ alternative_place_spellings_dict= {"Alexandria": ("Alexandria", "aleksandria", "
 "Bombay": ("bombay", 1),
 "Calcutta": ("Calcutta", "Kolkata", 2),
 "Constantine": ("Constantine", "Qacentina", "Kasantina", 3),
-"Djerba": ("Djerba", "gerba", "gerbah", "jerbah", "bjerba", "bjerbah", 7),
+"Djerba": ("Djerba", "gerba", "gerbah", "jerbah", "bjerba", "bjerbah", 6),
 "Jerusalem": ("Jerusalem", "yerushalayim", 2),
 "Livorno": ("Livorno", "Leghorn", 2),
 "Oran": ("Oran", "Wehran", 2),
@@ -79,8 +80,9 @@ def assemble_url(a_title, current_place_lst):
     baseurl = "https://www.worldcat.org/search?q=" + title
     print("LENTH OF A PLACE LIST: ", len(current_place_lst))
     if len(current_place_lst) > 0:
-        print("Greater than 0")
+        print("Greater than 0. here's the list:", current_place_lst)
         # if len(current_place_lst) > 1:
+        print("here's the range: ", current_place_lst[-1])
         url_lst = [baseurl + "+" + reg_ex(current_place_lst[i]) for i in range(current_place_lst[-1])]
         print("this is the url list!!!", url_lst)
         # else:
@@ -234,6 +236,7 @@ def make_request(url_lst, error_cell_number):
 
                 #go to next iterator in the URL list 
                 legit_url = False
+                valid_entries = False
                 print("\n\n\nNEEDS TO CONTINUE HERE\n\n\n")
                 continue
                 # return request_without_error
@@ -285,7 +288,7 @@ def make_request(url_lst, error_cell_number):
                     error_message = "Wrong language"
                     # write_to_excel(error_cell_number, error_message)
                     print(error_message)            
-                    return valid_entries   ### --> in this case, only thing returned is false.
+                    # return valid_entries   ### --> in this case, only thing returned is false.
         #end of iterator
     #end of while statement
 
@@ -302,9 +305,11 @@ def make_request(url_lst, error_cell_number):
             item_genre_or_false = find_item_genre(item_page_soup)
             item_provenance_or_false= find_item_provenance(item_page_soup)
 
-        ### need to find number of pages, and other notes, if possible, and return a tuple 
-        return_tuple = (subject_string_or_false, item_description_or_false, item_notes_or_false, item_OCLC_or_false, item_genre_or_false, item_provenance_or_false)
-        print(len(return_tuple))
+            ### need to find number of pages, and other notes, if possible, and return a tuple 
+            return_tuple = (subject_string_or_false, item_description_or_false, item_notes_or_false, item_OCLC_or_false, item_genre_or_false, item_provenance_or_false)
+        else:
+            return_tuple = False
+
         print(return_tuple)
         return return_tuple
 
@@ -327,7 +332,9 @@ def iterate_excel_file():
     current_number = 2  ############ ---> Original start row = 2
 
 
-    current_number = 66
+    # current_number = 13
+    current_number = 312
+
 
     title_cell_number = "H" + str(current_number)
     author_cell_number = "G" + str(current_number)
@@ -345,7 +352,7 @@ def iterate_excel_file():
     # while sheet[title_cell_number].value != None:
 
     #just trying this out on sept 30 to see if i can isolate the problem
-    while current_number < 68:
+    while current_number < 1000:
     # for i in range(3):
         #if item does not already have subjects assined to it
     #       print("value of subject cell is None!!!")
@@ -354,7 +361,7 @@ def iterate_excel_file():
         current_title = sheet[title_cell_number].value
 
         ### making sure the title is more than one word long
-        if len(current_title) > 1:
+        if current_title != None and len(current_title) > 1:
             # print(current_title)
             #current place now needs to map to a dictionary of alternative place spellings
             print("THIS SI THE CURRENT PLACE!")
