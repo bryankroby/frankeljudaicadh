@@ -5,15 +5,12 @@ import secrets as secrets
 from bs4 import BeautifulSoup
 import pandas as pd
 import re
-
 from openpyxl import Workbook 
 from openpyxl import load_workbook
 import openpyxl
 
-# api_key = secrets.api_key
 
-# FNAME = "Judeo_arabic_spreadsheet copy.csv"
-# FNAME = "Judeo_arabic_spreadsheet copy.xlsx"
+#this is to read it from an XLSX file. make sure the sheet is named accordingly later on in the code
 FNAME = "Judeo_arabic_spreadsheet copy.xlsx"
 # FNAME = "Judeo_arabic_spreadsheet copy.csv"
 
@@ -34,26 +31,13 @@ alternative_place_spellings_dict= {"Alexandria": ("Alexandria", "aleksandria", "
 "Tunis": ("tunis", 1)
 }
 
-# with open(FNAME, "rb") as ifile:
-#     text = ifile.read()
-#     print(text)
-
-
-
-# reader = csv.reader(ifile)
-# for row in reader:
-#     print(row)
-
-
 
 #opens excel file, writes subjects to the given subject_tag cell number --> WILL NEED TO CHANGE SPECIFIED CELL # LATER
 def write_to_excel(write_to_cell_number, content_to_write):
     wb = Workbook()
     xfile = openpyxl.load_workbook(filename = FNAME, read_only=False, keep_vba=False)
-     # prior to sept 28
     sheet = xfile.get_sheet_by_name('Judeo-Arabic')
 
-    #print(sheet[write_to_cell_number].value)
     sheet[write_to_cell_number].value = content_to_write
     xfile.save(FNAME)
 
@@ -76,35 +60,21 @@ def make_soup(url):
     return soup_contents
 
 
-#takes give title, eliminates uncessary characters and tokenizes, creates primary url. 
-
-#if first word in title is "al" creates, secondary url
+#takes given title, eliminates uncessary characters and tokenizes, creates primary url. 
+#if first word in title is "al" creates, secondary url cause "al" is never included in the URL
 def assemble_url(a_title, current_place_lst):
     title= reg_ex(a_title)
     baseurl = "https://www.worldcat.org/search?q=" + title
     print("LENTH OF A PLACE LIST: ", len(current_place_lst))
     if len(current_place_lst) > 0:
-        print("Greater than 0. here's the list:", current_place_lst)
-        # if len(current_place_lst) > 1:
-        print("here's the range: ", current_place_lst[-1])
         url_lst = [baseurl + "+" + reg_ex(current_place_lst[i]) for i in range(current_place_lst[-1])]
-        print("this is the url list!!!", url_lst)
-        # else:
-        #     print("length is 1")
-        #     url_lst = [baseurl + "+" + reg_ex(current_place_lst[0])]
-        # url_lst = []
-        # for i in range(:len(a_place_tuple))
-        #     print("this is i!!!! ", a_place_tuple[i])
-        #     place = reg_ex(a_place_tuple[1])
-        #     primary_url = baseurl + "-" + place
-        #     print(primary_url)
     else:
-        # print("COULD NOT FIND A PLACE. ITS AN EMPTY TUPLE")
         url_lst = [baseurl]
         print(url_lst)
 # url's are now a lst of urls. will return a lst either way
     return url_lst
-#
+
+
 ##try to find subject div, if doesn't exist, meaning there are no subjects, return false and record the error in error_cell_number
 ##if there are subjects, return subject string. 
 def find_subjects(soup, error_cell_number):
@@ -119,7 +89,6 @@ def find_subjects(soup, error_cell_number):
             subjects = line.text.replace(".", "").split("\n")
             for a_line in subjects:
                 a_line = a_line.split(" -- ")
-
 
         ## finally i've got a line that is all clean
                 for word in a_line:
@@ -139,7 +108,7 @@ def find_subjects(soup, error_cell_number):
     #the item doesn't have subject terms 
     else:
         ##couldn't get subjects 
-        print("Could not find subjects")
+        # print("Could not find subjects")
         error_message = "No subjects"
         write_to_excel(error_cell_number, error_message)
         return False            
@@ -148,11 +117,7 @@ def find_subjects(soup, error_cell_number):
 ## finds and returns description or false. does not record an error message
 def find_page_number_description(soup):
     try:
-        # description_div = soup.find(id = "details-description")
-        # description = description_div.find("td").text
-        # print(description)
         description = soup.find("tr", id = 'details-description').find("td").text
-        print(description)
         return description
     except:
         print("no description")
@@ -162,10 +127,6 @@ def find_page_number_description(soup):
 def find_item_notes(soup):
     # if notes_div exists:
     try:
-        # notes_div = soup.find(id = "details-notes")
-        # notes = notes_div.find("td")
-        # notes = str(notes).replace("<br/>", " ").replace("<td>", "").replace("</td>", "")
-        # print(notes)
         notes = soup.find("tr", id = 'details-notes').find("td").text
         print(notes)
         return notes
@@ -176,12 +137,7 @@ def find_item_notes(soup):
 
 ## finds and returns OCLC number or false. does not record an error message
 def find_item_OCLC(soup):
-    # if notes_div exists:
-    # try:
-        # OCLC_div = soup.find(id = "details-oclcno")
-        # OCLC = notes_div.find("td")
-        # OCLC = str(OCLC).replace("<br/>", " ").replace("<td>", "").replace("</td>", "")
-        # print(OCLC)
+    # if oclc_div exists:
     OCLC = soup.find("tr", id = 'details-oclcno').find("td").text
     print(OCLC)
     return OCLC
@@ -193,55 +149,38 @@ def find_item_OCLC(soup):
 def find_item_genre(soup):
     # if genre_div exists:
     try:
-        # genre_div = soup.find(id = "details-genre")
-        # print(genre_div)
-        # genre = notes_div.find("td")
-        # print(genre)
-        # genre = str(genre).replace("<br/>", " ").replace("<td>", "").replace("</td>", "")
-        # print(genre)
         genre = soup.find("tr", id = 'details-genre').find("td").text
-        print(genre)
         return genre
-    # no notes_div exists
     except:
         print("no genre")
         return False
 
 def find_item_provenance(soup):
-    # if genre_div exists:
+    # if provenance_div exists:
     try:
-        # provenance_div = soup.find(id = "details-provenance")
-        # provenance = provenance_div.find("td")
-        # provenance = str(provenance).replace("<br/>", " ").replace("<td>", "").replace("</td>", "")
-        # print(provenance)
         provenance = soup.find("tr", id ='details-provenance').find("td").text
         print(provenance)
         return provenance
-    # no notes_div exists
     except:
         print("no provenance")
         return False
 
 ## makes search request looks for subjects
 def make_request(url_lst, error_cell_number):
-    print("Making request for new data using url_lst")
+    # print("Making request for new data using url_lst")
     legit_url = False
     while legit_url == False:
         for i in url_lst:
             soup = make_soup(i)
-            print("got to line 233")
             #check if error with primary url
             if soup.find_all(class_ = "error-results", id = "div-results-none"):
                 print("error with primary url")
                 error_message = "Error with primary URL"
-                # write_to_excel(error_cell_number, error_message)
-                print(error_message)
                 request_without_error = False
 
                 #go to next iterator in the URL list 
                 legit_url = False
                 valid_entries = False
-                print("\n\n\nNEEDS TO CONTINUE HERE\n\n\n")
                 continue
                 # return request_without_error
 
@@ -290,15 +229,6 @@ def make_request(url_lst, error_cell_number):
                     valid_entries = False
                     legit_url = False
                     error_message = "Wrong language"
-                    # write_to_excel(error_cell_number, error_message)
-                    print(error_message)            
-                    # return valid_entries   ### --> in this case, only thing returned is false.
-        #end of iterator
-    #end of while statement
-
-
-# else:
-#     pass
 
         ## able to find a valid entry, will look for and return the subject string if exists, if not, returns False
         if valid_entries == True:
@@ -321,26 +251,13 @@ def make_request(url_lst, error_cell_number):
 
 def iterate_excel_file():
 
-    # ####prior to sept 28, this is how you loaded data. i now cant remember why i did it this way
     wb = load_workbook(filename = FNAME, read_only = True)
     ## getting a specific sheet from the XL
     sheet = wb['Judeo-Arabic']
-    sheet = wb.active   ## got this from https://stackoverflow.com/questions/49159245/python-error-on-get-sheet-by-name
-    
-    # with open(FNAME, "rb") as ifile:
-    #     sheet = ifile.read()
-    #     print("i")
-        # print(text)
-# post sept 28, i thought i could put it in csv format instead
-    # with open(FNAME, 'rb') as csvfile:
-    #     sheet = csv.reader(csvfile)
+    sheet = wb.active      
 
     ## Cell row to start with 
     current_number = 2  ############ ---> Original start row = 2
-
-
-    # current_number = 13
-    # current_number = 312
 
 
     title_cell_number = "H" + str(current_number)
@@ -354,63 +271,32 @@ def iterate_excel_file():
     oclc_cell_number = "AH" + str(current_number)
     provenance_cell_number = "AI" + str(current_number)
     #for all the rows of items.
-
-    #this used to be like this prior to sept 28
-    # while sheet[title_cell_number].value != None:
-
-    #just trying this out on sept 30 to see if i can isolate the problem
     while current_number < 315:
-    # for i in range(3):
-        #if item does not already have subjects assined to it
-    #       print("value of subject cell is None!!!")
+
         print("Title cell number:")
-        print(title_cell_number)
+        # print(title_cell_number)
         current_title = sheet[title_cell_number].value
 
         ### making sure the title is more than one word long
         if current_title != None and len(current_title) > 1:
-            # print(current_title)
             #current place now needs to map to a dictionary of alternative place spellings
-            print("THIS SI THE CURRENT PLACE!")
             current_place = sheet[place_cell_number].value
-            # print(current_place)
 
             if current_place in alternative_place_spellings_dict:
-                # print((alternative_place_spellings_dict.items()))
                 if alternative_place_spellings_dict[current_place][-1] != 1:
                     current_place_lst= list(alternative_place_spellings_dict[current_place])
                 else:
                     current_place_lst = list(alternative_place_spellings_dict[current_place])
-
-                    # print("CURRENT PLACE LIST: ", current_place_lst)
-                    # print(current_place_lst)
-                    # print("WENT TO THE DICT !!!!!!!!!!!!!!!!!!!!")
             else:
                 current_place_lst = []
 
-                # print("DIDNT GO TO THE DICT!!!")
-
-            ##pass the title and current_place_lst into assemble_url(), which makes it into a url can make request with
-            
-            # if current_author != "":
             assembled_url = assemble_url(current_title, current_place_lst)
-            #     print(assembled_url)
-            # else:
-            #     assembled_url = assembled_url(current_title)
 
-            #                     assembled_url = assembled_url(current_title)
-
-    ## could also make it so that it always puts in the the author, if putting in a "" author doesn't mess it up. 
-            ##making the request with assembled URL, if there's an error, will return false
             result = make_request(assembled_url, error_cell_number) 
 
-            ## meaning there was a valid entry 
-            # if result != False:
 
-            # <1 would mean was no valid entry and therefore, didn't get subjects
             ## meaning there was a valid entry and it went forth to check subjects, notes, description
             if result != False:
-            # if len(result) >1:
                 subjects = result[0]
                 description = result[1]
                 notes = result[2]
@@ -444,7 +330,6 @@ def iterate_excel_file():
                     write_to_excel(provenance_cell_number, provenance)
 
 
-
         ## writing in excel saying it was skipped because of non-distinct name
         else:
             error_message = "Indistinct title"
@@ -468,12 +353,6 @@ def iterate_excel_file():
 
 
 
-
-    #return sheet
-
-
-
-
 ######### To demo a part of the script #######
 # example_assembled = 'https://www.worldcat.org/title/kohelet-im-sharh-ha-arvi-ha-meduberet-ben-ha-am-ve-im-perush-shema-shelomoh'
 
@@ -484,31 +363,3 @@ def iterate_excel_file():
 
 ######### TO RUN THE SCRIPT, UNCOMMENT BELOW! ######
 iterate_excel_file()
-
-
-
-######  SCRIPT TO-DO LIST #####
-# if starts with al, make a contingency url, that eliminates it DONEZO
-# if not, choose the second link  DONEZO
-# run the loop again, but if if the value of the subject_tags column is none, then get the info DONEZO
-# if lands on a page with many items, choose the first one, look for subjects DONEZO
-
-## possibly investigate second href on the menu page, as well
-
-## improve what happens with tags with commas in them like:
-#"Esther,; Queen; of; Persia; Bible; stories,; Judeo; Arabic; Esther; Old; Testament"
-# or " Judeo-Arabic; literature; Jews; History; To; 70; AD"
-
-
-### make a contingency before getting something from the menu that it is in hebrew or judeo-arabic
-
-## need to make it so file format doesn't die after writing on it.
-
-
-#instead of constructing url of title, make a url of title and author, if available 
-#also, confirm the text is in hebrew / j-a
-
-
-### add a flagging to the spread sheet in a different column to say there was an error, couldn't find
-
-
